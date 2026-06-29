@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMCO Task Board — Marketing Coordinator</title>
+<style>
+  :root {
+    --bg: #F5F4F1; --surface: #FFFFFF; --surface-2: #F0EEE9;
+    --border: #E2DED7; --border-strong: #C8C4BC;
+    --text: #1C1B18; --text-2: #5C5A55; --text-3: #9C9A95;
+    --blue: #185FA5; --blue-bg: #E6F1FB; --blue-text: #0C447C;
+    --teal: #0F6E56; --teal-bg: #E1F5EE; --teal-text: #085041;
+    --amber: #854F0B; --amber-bg: #FAEEDA; --amber-text: #633806;
+    --purple: #3C3489; --purple-bg: #EEEDFE; --purple-text: #26215C;
+    --coral: #993C1D; --coral-bg: #FAECE7; --coral-text: #712B13;
+    --pink: #72243E; --pink-bg: #FBEAF0; --pink-text: #4B1528;
+    --doing: #EF9F27; --done: #1D9E75;
+    --radius: 8px; --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .logo { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .logo span { color: var(--blue); }
+  .header-sub { font-size: 12px; color: var(--text-3); }
+  .header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .period-badge { font-size: 12px; font-weight: 500; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; }
+  .user-status { font-size: 12px; color: var(--text-2); padding: 4px 12px; background: var(--surface-2); border-radius: 20px; border: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+  .online-dot { width: 6px; height: 6px; border-radius: 50%; background: #1D9E75; }
+  .active-users { font-size: 11px; color: var(--text-3); }
+
+  .btn { font-size: 12px; padding: 6px 12px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+  .btn:hover { background: var(--surface-2); color: var(--text); }
+  .btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .btn-primary:hover { background: #0C447C; border-color: #0C447C; color: #fff; }
+  .btn-sm { font-size: 11px; padding: 4px 9px; }
+  .btn-green { border-color: var(--done); color: var(--teal); }
+  .btn-green:hover { background: var(--teal-bg); }
+  .btn-danger { border-color: #E24B4A; color: #A32D2D; }
+  .btn-danger:hover { background: #FCEBEB; }
+
+  main { padding: 20px 24px; max-width: 1300px; margin: 0 auto; }
+
+  .controls-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .filter-group { display: flex; gap: 5px; flex-wrap: wrap; }
+  .filter-label { font-size: 11px; color: var(--text-3); align-self: center; margin-right: 2px; }
+  .filter-btn { font-size: 12px; padding: 5px 11px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all 0.12s; }
+  .filter-btn:hover { background: var(--surface-2); }
+  .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .freq-filter-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .divider-v { width: 1px; background: var(--border); margin: 0 4px; align-self: stretch; }
+
+  .grade-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 18px; }
+  .grade-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+  .grade-score { font-size: 30px; font-weight: 600; line-height: 1; }
+  .grade-letter { font-size: 30px; font-weight: 600; line-height: 1; }
+  .grade-A { color: var(--done); } .grade-B { color: #185FA5; } .grade-C { color: #EF9F27; } .grade-D { color: #E24B4A; }
+  .prog-wrap { flex: 1; min-width: 180px; }
+  .prog-track { background: var(--surface-2); border-radius: 20px; height: 8px; border: 1px solid var(--border); overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 20px; background: var(--done); transition: width 0.4s ease; }
+  .grade-breakdown { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .breakdown-item { font-size: 11px; color: var(--text-2); }
+  .breakdown-item strong { display: block; font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+
+  .columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .col { background: var(--surface-2); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 12px; min-height: 280px; }
+  .col-header { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+  .col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-todo { background: var(--border-strong); } .dot-doing { background: var(--doing); } .dot-done { background: var(--done); }
+  .col-title { font-size: 13px; font-weight: 500; }
+  .col-count { font-size: 11px; color: var(--text-3); background: var(--surface); border-radius: 20px; padding: 1px 7px; border: 1px solid var(--border); margin-left: auto; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 10px; margin-bottom: 7px; position: relative; }
+  .card.doing { border-left: 3px solid var(--doing); border-radius: 0 var(--radius) var(--radius) 0; }
+  .card.done { border-left: 3px solid var(--done); border-radius: 0 var(--radius) var(--radius) 0; opacity: 0.48; }
+  .card.skipped { opacity: 0.28; border-style: dashed; }
+  .card-attribution { font-size: 10px; color: var(--text-3); margin-bottom: 4px; font-style: italic; }
+  .card-text { font-size: 12px; line-height: 1.45; margin-bottom: 6px; }
+  .card-footer { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }
+  .pill { font-size: 10px; padding: 1px 6px; border-radius: 20px; font-weight: 500; }
+  .pill-Submissions { background: var(--blue-bg); color: var(--blue-text); }
+  .pill-Content     { background: var(--teal-bg); color: var(--teal-text); }
+  .pill-Digital     { background: var(--coral-bg); color: var(--coral-text); }
+  .pill-Marketing   { background: var(--amber-bg); color: var(--amber-text); }
+  .pill-Admin       { background: var(--purple-bg); color: var(--purple-text); }
+  .freq-pill { font-size: 10px; padding: 1px 6px; border-radius: 20px; }
+  .freq-W { background: #FBEAF0; color: #72243E; }
+  .freq-M { background: var(--blue-bg); color: #185FA5; }
+  .freq-Q { background: var(--teal-bg); color: #0F6E56; }
+  .freq-Y { background: var(--amber-bg); color: #633806; }
+  .duty-ref { font-size: 10px; color: var(--text-3); margin-left: auto; }
+  .card-actions { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .skip-toggle { font-size: 10px; color: var(--text-3); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; margin-left: auto; }
+  .skip-toggle:hover { color: var(--text-2); }
+  .empty-col { font-size: 12px; color: var(--text-3); text-align: center; padding: 2rem 1rem; border: 1px dashed var(--border); border-radius: var(--radius); }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 24px; width: 100%; max-width: 480px; }
+  .modal h3 { font-size: 15px; font-weight: 500; margin-bottom: 16px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; color: var(--text-2); margin-bottom: 5px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; font-size: 13px; padding: 8px 10px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; font-family: inherit; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--blue); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+
+  .login-modal { display: flex !important; }
+  .login-container { text-align: center; }
+  .login-container h2 { margin-bottom: 20px; font-size: 18px; }
+  .login-container input { margin-bottom: 12px; }
+
+  .history-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; margin-top: 20px; }
+  .history-title { font-size: 13px; font-weight: 500; margin-bottom: 12px; }
+  .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+  .history-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; }
+  .history-period { font-size: 11px; color: var(--text-3); margin-bottom: 2px; }
+  .history-label { font-size: 10px; color: var(--text-3); margin-bottom: 4px; }
+  .history-grade { font-size: 20px; font-weight: 600; }
+  .history-pct { font-size: 11px; color: var(--text-2); }
+  .no-history { font-size: 12px; color: var(--text-3); }
+
+  .comment-section { background: var(--surface-2); border-radius: var(--radius); padding: 8px; margin-top: 8px; font-size: 11px; }
+  .comment { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px; margin-bottom: 4px; }
+  .comment-author { color: var(--text-3); font-weight: 500; }
+  .comment-text { margin-top: 2px; color: var(--text); }
+  .comment-input { display: flex; gap: 4px; }
+  .comment-input input { flex: 1; font-size: 11px; padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius); }
+  .comment-input button { font-size: 10px; padding: 4px 8px; }
+
+  @media (max-width: 720px) {
+    .columns { grid-template-columns: 1fr; }
+    main { padding: 14px; }
+    header { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">EMCO <span>Building</span></div>
+    <div class="header-sub">Marketing Coordinator — Collaborative Task Board</div>
+  </div>
+  <div class="header-right">
+    <div class="user-status">
+      <div class="online-dot"></div>
+      <span id="current-user">Loading...</span>
+    </div>
+    <div class="active-users">
+      <span id="active-count">0</span> online
+    </div>
+    <span class="period-badge" id="period-badge"></span>
+    <button class="btn" onclick="openModal()">+ Add task</button>
+    <button class="btn btn-primary" onclick="closePeriod()">Close period</button>
+    <button class="btn" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<main>
+  <div class="controls-bar">
+    <span class="filter-label">Category:</span>
+    <div class="filter-group" id="cat-filters"></div>
+    <div class="divider-v"></div>
+    <span class="filter-label">Frequency:</span>
+    <div class="filter-group" id="freq-filters"></div>
+    <div style="margin-left:auto;">
+      <button class="btn btn-sm" onclick="resetPeriod()">↺ Reset period</button>
+    </div>
+  </div>
+
+  <div class="grade-panel">
+    <div class="grade-top">
+      <div>
+        <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;" id="grade-period-label">Period grade</div>
+        <div style="display:flex;align-items:baseline;gap:10px;">
+          <span class="grade-score" id="grade-pct">—</span>
+          <span class="grade-letter" id="grade-letter">—</span>
+        </div>
+      </div>
+      <div class="prog-wrap">
+        <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;" id="grade-summary">No active tasks</div>
+        <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="grade-breakdown">
+      <div class="breakdown-item"><strong id="bd-total">0</strong>Active</div>
+      <div class="breakdown-item"><strong id="bd-done">0</strong>Done</div>
+      <div class="breakdown-item"><strong id="bd-doing">0</strong>In progress</div>
+      <div class="breakdown-item"><strong id="bd-todo">0</strong>To do</div>
+      <div class="breakdown-item"><strong id="bd-skipped">0</strong>Skipped</div>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="col">
+      <div class="col-header"><div class="col-dot dot-todo"></div><span class="col-title">To do</span><span class="col-count" id="cnt-todo">0</span></div>
+      <div id="cards-todo"></div>
+    </div>
+    <div class="col">
+      <div class="col-header"><div class="col-dot dot-doing"></div><span class="col-title">In progress</span><span class="col-count" id="cnt-doing">0</span></div>
+      <div id="cards-doing"></div>
+    </div>
+    <div class="col">
+      <div class="col-header"><div class="col-dot dot-done"></div><span class="col-title">Done</span><span class="col-count" id="cnt-done">0</span></div>
+      <div id="cards-done"></div>
+    </div>
+  </div>
+
+  <div class="history-panel">
+    <div class="history-title">Period history</div>
+    <div id="history-content"><p class="no-history">Closed periods will appear here.</p></div>
+  </div>
+</main>
+
+<!-- Login Modal -->
+<div class="modal-overlay login-modal" id="login-modal">
+  <div class="modal">
+    <div class="login-container">
+      <h2>EMCO Task Board</h2>
+      <p style="color: var(--text-3); margin-bottom: 16px;">Enter your name to join</p>
+      <input type="text" id="login-username" placeholder="Your name" onkeypress="if(event.key==='Enter') login()">
+      <button class="btn btn-primary" style="width: 100%;" onclick="login()">Join board</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Add task</h3>
+    <div class="form-group">
+      <label>Task description</label>
+      <textarea id="input-text" placeholder="Describe the task..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="input-cat">
+        <option value="Submissions">Submissions</option>
+        <option value="Content">Content</option>
+        <option value="Digital">Digital</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Admin">Admin</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Frequency</label>
+      <select id="input-freq">
+        <option value="W">Weekly</option>
+        <option value="M">Monthly</option>
+        <option value="Q">Quarterly</option>
+        <option value="Y">Yearly</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Duty reference (optional)</label>
+      <input type="text" id="input-duty" placeholder="e.g. D2, D5">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTask()">Save task</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FREQ_LABELS = { W: 'Weekly', M: 'Monthly', Q: 'Quarterly', Y: 'Yearly' };
+const WS_URL = (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host;
+
+let ws = null;
+let currentUser = null;
+let tasks = [];
+let taskState = {};
+let skipped = {};
+let history = [];
+let allUsers = [];
+let activeUsers = [];
+
+let catFilter = 'all', freqFilter = 'all';
+let editingId = null;
+
+// Authentication
+function login() {
+  const username = document.getElementById('login-username').value.trim();
+  if (!username) return alert('Please enter your name');
+  
+  fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username })
+  })
+  .then(r => r.json())
+  .then(data => {
+    currentUser = data.user;
+    localStorage.setItem('emco_userId', data.userId);
+    localStorage.setItem('emco_token', data.token);
+    document.getElementById('login-modal').classList.remove('open');
+    connectWebSocket(data.userId, data.token);
+  })
+  .catch(e => alert('Login failed'));
+}
+
+function logout() {
+  if (ws) ws.close();
+  localStorage.removeItem('emco_userId');
+  localStorage.removeItem('emco_token');
+  location.reload();
+}
+
+function connectWebSocket(userId, token) {
+  ws = new WebSocket(WS_URL);
+  
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ type: 'auth', userId, token }));
+  };
+  
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    handleMessage(msg);
+  };
+  
+  ws.onerror = () => alert('Connection error');
+  ws.onclose = () => setTimeout(() => connectWebSocket(userId, token), 3000);
+}
+
+function handleMessage(msg) {
+  if (msg.type === 'sync') {
+    tasks = msg.tasks;
+    taskState = msg.taskState;
+    history = msg.history;
+    allUsers = msg.users;
+    activeUsers = msg.activeUsers;
+    updateUserList();
+    render();
+  }
+  if (msg.type === 'user-joined') {
+    activeUsers = activeUsers.filter(u => u.id !== msg.user.id);
+    activeUsers.push(msg.user);
+    updateUserList();
+  }
+  if (msg.type === 'user-left') {
+    activeUsers = activeUsers.filter(u => u.id !== msg.userId);
+    updateUserList();
+  }
+  if (msg.type === 'task-added') {
+    tasks.push(msg.task);
+    render();
+  }
+  if (msg.type === 'task-updated') {
+    const t = tasks.find(x => x.id === msg.task.id);
+    if (t) Object.assign(t, msg.task);
+    render();
+  }
+  if (msg.type === 'task-moved') {
+    taskState[msg.id] = msg.status;
+    render();
+  }
+  if (msg.type === 'task-deleted') {
+    tasks = tasks.filter(t => t.id !== msg.id);
+    delete taskState[msg.id];
+    render();
+  }
+  if (msg.type === 'task-skipped') {
+    const t = tasks.find(x => x.id === msg.id);
+    if (t) t.skipped = msg.skipped;
+    render();
+  }
+  if (msg.type === 'period-closed') {
+    history.unshift(msg.period);
+    taskState = msg.newState;
+    render();
+  }
+  if (msg.type === 'comment-added') {
+    const t = tasks.find(x => x.id === msg.taskId);
+    if (t) t.comments = t.comments || [];
+    t.comments.push(msg.comment);
+    render();
+  }
+}
+
+function updateUserList() {
+  document.getElementById('current-user').textContent = currentUser?.username || 'Guest';
+  document.getElementById('active-count').textContent = activeUsers.length;
+}
+
+// Core functions
+function getStatus(id) { return taskState[id] || 'todo'; }
+function isSkipped(id) { return tasks.find(t => t.id === id)?.skipped; }
+
+function move(id, s) {
+  taskState[id] = s;
+  ws.send(JSON.stringify({ type: 'task-move', id, status: s }));
+}
+
+function toggleSkip(id) {
+  const t = tasks.find(x => x.id === id);
+  if (t) {
+    ws.send(JSON.stringify({ type: 'task-skip', id, skipped: !t.skipped }));
+  }
+}
+
+function deleteTask(id) {
+  if (!confirm('Remove this task permanently?')) return;
+  ws.send(JSON.stringify({ type: 'task-delete', id }));
+}
+
+function resetPeriod() {
+  taskState = {};
+  tasks.forEach(t => t.skipped = false);
+  render();
+}
+
+function getGrade(pct) {
+  if (pct >= 90) return { letter: 'A', cls: 'grade-A' };
+  if (pct >= 75) return { letter: 'B', cls: 'grade-B' };
+  if (pct >= 55) return { letter: 'C', cls: 'grade-C' };
+  return { letter: 'D', cls: 'grade-D' };
+}
+
+function getPeriodLabel() {
+  const now = new Date();
+  if (freqFilter === 'W') {
+    const start = new Date(now); start.setDate(now.getDate() - now.getDay() + 1);
+    const end   = new Date(start); end.setDate(start.getDate() + 6);
+    const fmt = d => d.toLocaleString('en-AU', { day:'numeric', month:'short' });
+    return `Week of ${fmt(start)} – ${fmt(end)}`;
+  }
+  if (freqFilter === 'M') return now.toLocaleString('en-AU', { month: 'long', year: 'numeric' });
+  if (freqFilter === 'Q') {
+    const q = Math.ceil((now.getMonth() + 1) / 3);
+    return `Q${q} ${now.getFullYear()}`;
+  }
+  if (freqFilter === 'Y') return `${now.getFullYear()}`;
+  return now.toLocaleString('en-AU', { month: 'long', year: 'numeric' });
+}
+
+function closePeriod() {
+  const visible = getVisible();
+  const active  = visible.filter(t => !isSkipped(t.id));
+  const done    = active.filter(t => getStatus(t.id) === 'done').length;
+  const total   = active.length;
+  const pct     = total ? Math.round((done / total) * 100) : 0;
+  const grade   = getGrade(pct);
+  const label   = getPeriodLabel();
+  const freqLbl = freqFilter === 'all' ? 'All' : FREQ_LABELS[freqFilter];
+  
+  ws.send(JSON.stringify({
+    type: 'period-close',
+    period: { label, freqLbl, pct, letter: grade.letter, cls: grade.cls, done, total }
+  }));
+  
+  alert(`Period closed — ${label}\nGrade: ${grade.letter} (${pct}%)\n${done} of ${total} tasks completed.`);
+}
+
+function openModal(id) {
+  editingId = id || null;
+  document.getElementById('modal-title').textContent = id ? 'Edit task' : 'Add task';
+  if (id) {
+    const t = tasks.find(x => x.id === id);
+    document.getElementById('input-text').value = t.text;
+    document.getElementById('input-cat').value  = t.cat;
+    document.getElementById('input-freq').value = t.freq;
+    document.getElementById('input-duty').value = t.duty || '';
+  } else {
+    document.getElementById('input-text').value = '';
+    document.getElementById('input-cat').value  = 'Submissions';
+    document.getElementById('input-freq').value = freqFilter !== 'all' ? freqFilter : 'M';
+    document.getElementById('input-duty').value = '';
+  }
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); editingId = null; }
+
+function saveTask() {
+  const text = document.getElementById('input-text').value.trim();
+  if (!text) { alert('Please enter a task description.'); return; }
+  const cat  = document.getElementById('input-cat').value;
+  const freq = document.getElementById('input-freq').value;
+  const duty = document.getElementById('input-duty').value.trim();
+  
+  if (editingId) {
+    const t = tasks.find(x => x.id === editingId);
+    if (t) {
+      ws.send(JSON.stringify({
+        type: 'task-update',
+        id: editingId,
+        updates: { text, cat, freq, duty }
+      }));
+    }
+  } else {
+    ws.send(JSON.stringify({
+      type: 'task-add',
+      task: { text, cat, freq, duty }
+    }));
+  }
+  closeModal();
+}
+
+function setCatFilter(f, btn) {
+  catFilter = f;
+  document.querySelectorAll('.cat-fb').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function setFreqFilter(f, btn) {
+  freqFilter = f;
+  document.querySelectorAll('.freq-fb').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updatePeriodBadge();
+  render();
+}
+
+function buildFilters() {
+  const catRow  = document.getElementById('cat-filters');
+  const freqRow = document.getElementById('freq-filters');
+  ['all','Submissions','Content','Digital','Marketing','Admin'].forEach(f => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn cat-fb' + (f === catFilter ? ' active' : '');
+    btn.textContent = f === 'all' ? 'All' : f;
+    btn.onclick = () => setCatFilter(f, btn);
+    catRow.appendChild(btn);
+  });
+  [['all','All'],['W','Weekly'],['M','Monthly'],['Q','Quarterly'],['Y','Yearly']].forEach(([f, label]) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn freq-fb freq-filter-btn' + (f === freqFilter ? ' active' : '');
+    btn.textContent = label;
+    btn.onclick = () => setFreqFilter(f, btn);
+    freqRow.appendChild(btn);
+  });
+}
+
+function updatePeriodBadge() {
+  const label = freqFilter === 'all' ? new Date().toLocaleString('en-AU', { month:'long', year:'numeric' }) : getPeriodLabel();
+  document.getElementById('period-badge').textContent = label;
+  const gradeLbl = freqFilter === 'all' ? 'Overall grade' : `${FREQ_LABELS[freqFilter]} grade`;
+  document.getElementById('grade-period-label').textContent = gradeLbl;
+}
+
+function getVisible() {
+  return tasks.filter(t =>
+    (catFilter === 'all' || t.cat === catFilter) &&
+    (freqFilter === 'all' || t.freq === freqFilter)
+  );
+}
+
+function renderGrade(visible) {
+  const active = visible.filter(t => !isSkipped(t.id));
+  const done   = active.filter(t => getStatus(t.id) === 'done').length;
+  const doing  = active.filter(t => getStatus(t.id) === 'doing').length;
+  const todo   = active.filter(t => getStatus(t.id) === 'todo').length;
+  const skCnt  = visible.filter(t => isSkipped(t.id)).length;
+  const total  = active.length;
+  const pct    = total ? Math.round((done / total) * 100) : 0;
+  const grade  = getGrade(pct);
+
+  document.getElementById('grade-pct').textContent    = total ? pct + '%' : '—';
+  const gl = document.getElementById('grade-letter');
+  gl.textContent  = total ? grade.letter : '—';
+  gl.className    = 'grade-letter ' + (total ? grade.cls : '');
+  document.getElementById('prog-fill').style.width    = pct + '%';
+  document.getElementById('grade-summary').textContent = total ? `${done} of ${total} active tasks completed` : 'No tasks in this view';
+  document.getElementById('bd-total').textContent   = total;
+  document.getElementById('bd-done').textContent    = done;
+  document.getElementById('bd-doing').textContent   = doing;
+  document.getElementById('bd-todo').textContent    = todo;
+  document.getElementById('bd-skipped').textContent = skCnt;
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-content');
+  if (!history.length) { el.innerHTML = '<p class="no-history">Closed periods will appear here.</p>'; return; }
+  el.innerHTML = `<div class="history-grid">${history.map(h => `
+    <div class="history-card">
+      <div class="history-label">${h.freqLbl}</div>
+      <div class="history-period">${h.label}</div>
+      <div class="history-grade ${h.cls}">${h.letter} <span class="history-pct">${h.pct}%</span></div>
+      <div style="font-size:11px;color:var(--text-3);margin-top:3px;">${h.done}/${h.total} tasks</div>
+    </div>`).join('')}</div>`;
+}
+
+function makeCard(task) {
+  const s  = getStatus(task.id);
+  const sk = isSkipped(task.id);
+  const div = document.createElement('div');
+  div.className = 'card' + (sk ? ' skipped' : (' ' + s));
+  const freqLabel = FREQ_LABELS[task.freq] || task.freq;
+  const createdBy = allUsers.find(u => u.id === task.createdBy)?.username || 'Unknown';
+  
+  let actions = '';
+  if (!sk) {
+    if (s === 'todo')  actions = `<button class="btn btn-sm" onclick="move('${task.id}','doing')">Start</button>`;
+    else if (s === 'doing') actions = `<button class="btn btn-sm" onclick="move('${task.id}','todo')">Back</button>
+      <button class="btn btn-sm btn-green" onclick="move('${task.id}','done')">Mark done</button>`;
+    else actions = `<button class="btn btn-sm" onclick="move('${task.id}','todo')">Reopen</button>`;
+  }
+  
+  div.innerHTML = `<div class="card-attribution">Added by ${createdBy}</div>
+    <div class="card-text">${task.text}</div>
+    <div class="card-footer">
+      <span class="pill pill-${task.cat}">${task.cat}</span>
+      <span class="freq-pill freq-${task.freq}">${freqLabel}</span>
+      ${task.duty ? `<span class="duty-ref">${task.duty}</span>` : ''}
+    </div>
+    <div class="card-actions">
+      ${actions}
+      <button class="skip-toggle" onclick="toggleSkip('${task.id}')">${sk ? 'Reactivate' : 'Skip'}</button>
+      <button class="btn btn-sm" style="margin-left:2px;" onclick="openModal('${task.id}')" title="Edit">✎</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteTask('${task.id}')" title="Delete">✕</button>
+    </div>`;
+  return div;
+}
+
+function render() {
+  const visible = getVisible();
+  renderGrade(visible);
+  renderHistory();
+
+  const byStatus = { todo:[], doing:[], done:[] };
+  visible.forEach(t => {
+    const col = isSkipped(t.id) ? 'todo' : getStatus(t.id);
+    byStatus[col].push(t);
+  });
+
+  document.getElementById('cnt-todo').textContent  = byStatus.todo.length;
+  document.getElementById('cnt-doing').textContent = byStatus.doing.length;
+  document.getElementById('cnt-done').textContent  = byStatus.done.length;
+
+  ['todo','doing','done'].forEach(col => {
+    const el = document.getElementById('cards-' + col);
+    el.innerHTML = '';
+    if (!byStatus[col].length) { el.innerHTML = '<div class="empty-col">Nothing here yet</div>'; return; }
+    byStatus[col].forEach(t => el.appendChild(makeCard(t)));
+  });
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+
+// Initialize
+buildFilters();
+updatePeriodBadge();
+
+// Check for existing session
+const userId = localStorage.getItem('emco_userId');
+const token = localStorage.getItem('emco_token');
+if (userId && token) {
+  fetch('/api/auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, token })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.authenticated) {
+      currentUser = data.user;
+      document.getElementById('login-modal').classList.remove('login-modal');
+      updateUserList();
+      connectWebSocket(userId, token);
+    } else {
+      document.getElementById('login-modal').classList.add('login-modal');
+    }
+  });
+} else {
+  document.getElementById('login-modal').classList.add('login-modal');
+}
+</script>
+</body>
+</html>
